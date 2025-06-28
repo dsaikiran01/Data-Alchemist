@@ -1,88 +1,133 @@
 "use client";
 
 import {
-  Container,
-  Typography,
-  Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Box,
-  Grid,
-  Stepper,
+  Button,
+  Container,
   Step,
   StepLabel,
+  Stepper,
+  Typography,
+  AccordionProps,
+  Grid,
   Paper,
+  Divider,
 } from "@mui/material";
 
+// src/app/page.tsx
+
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
+
+import FileUploadPanel from "@/components/FileUploadPanel";
 import RuleInputForm from "@/components/RuleBuilder/RuleInputForm";
 import RuleList from "@/components/RuleBuilder/RuleList";
 import NaturalRuleInput from "@/components/RuleBuilder/NaturalRuleInput";
 import RuleSuggestions from "@/components/RuleBuilder/RuleSuggestions";
 import SliderWeights from "@/components/PrioritySettings/SliderWeights";
 import ExportPanel from "@/components/ExportPanel";
-import FileUploadPanel from "@/components/FileUploadPanel";
-import Navbar from "@/components/layout/Navbar";
 
-// Placeholder values for now
-const dummyTaskIds = ["T1", "T2", "T3"];
-const dummyGroups = ["Sales", "Tech", "Ops"];
+// Placeholder data
+// const dummyTaskIds = ["T1", "T2", "T3"];
+// const dummyGroups = ["Sales", "Tech", "Ops"];
 
-export default function Home() {
+const steps = ["Upload", "Rules", "Prioritize", "Export"];
+
+export default function CollapsibleStepperPage() {
+  const [activeStep, setActiveStep] = useState(0);
+
+  const handleNext = () => {
+    if (activeStep < steps.length - 1) setActiveStep(activeStep + 1);
+  };
+
+  const isOpen = (index: number) => index <= activeStep;
+
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
-      {/* HEADER */}
       <Typography variant="h4" gutterBottom>
-        ⚙️ Data Alchemist — Configurator
+        🧪 Data Alchemist — Configurator
       </Typography>
-      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-        Upload your task, client, and worker data — then define smart rules,
-        prioritize constraints, and export your allocation-ready config.
-      </Typography>
-
-      {/* STEP INDICATOR */}
-      <Box mt={4}>
-        <Stepper activeStep={1} alternativeLabel>
-          {["Upload", "Rules", "Priorities", "Export"].map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-
-      <Divider sx={{ my: 5 }} />
-
-      {/* RULE BUILDER */}
-      <Typography variant="h5" gutterBottom>
-        📜 Rule Engine
+      <Typography variant="body2" color="text.secondary" gutterBottom>
+        Upload your data, define rules, prioritize constraints, and export configuration.
       </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={6}>
-          <RuleInputForm taskIds={dummyTaskIds} groupTags={dummyGroups} />
-          <NaturalRuleInput />
-          <RuleSuggestions />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <RuleList />
-        </Grid>
-      </Grid>
+      {/* 🧭 PROGRESS BAR */}
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mt: 4, mb: 6 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-      <Divider sx={{ my: 6 }} />
+      {/* 📥 Step 1: Upload */}
+      <Accordion expanded={isOpen(0)}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6">📥 Upload CSV Files</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <FileUploadPanel />
+          <Box textAlign="right">
+            <Button variant="contained" onClick={handleNext}>
+              Continue to Rules
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* PRIORITIZATION */}
-      <Typography variant="h5" gutterBottom>
-        🎚 Prioritization Settings
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <SliderWeights onChange={(weights) => console.log("Weights updated:", weights)} />
-      </Paper>
+      {/* 📜 Step 2: Rule Builder */}
+      <Accordion expanded={isOpen(1)} disabled={!isOpen(1)}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6">📜 Build Allocation Rules</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <RuleInputForm taskIds={["T1", "T2", "T3"]} groupTags={["Ops", "Tech"]} />
+              <NaturalRuleInput />
+              <RuleSuggestions />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <RuleList />
+            </Grid>
+          </Grid>
+          <Box textAlign="right" mt={2}>
+            <Button variant="contained" onClick={handleNext}>
+              Continue to Prioritization
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
-      <Divider sx={{ my: 6 }} />
+      {/* 🎚 Step 3: Prioritization */}
+      <Accordion expanded={isOpen(2)} disabled={!isOpen(2)}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6">🎚 Set Prioritization Weights</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Paper sx={{ p: 3 }}>
+            <SliderWeights onChange={(w) => console.log("weights", w)} />
+          </Paper>
+          <Box textAlign="right" mt={2}>
+            <Button variant="contained" onClick={handleNext}>
+              Continue to Export
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* EXPORT */}
-      <ExportPanel />
-
-      <FileUploadPanel />
-
+      {/* 📦 Step 4: Export */}
+      <Accordion expanded={isOpen(3)} disabled={!isOpen(3)}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6">📦 Export Final Config</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ExportPanel />
+        </AccordionDetails>
+      </Accordion>
     </Container>
   );
 }
