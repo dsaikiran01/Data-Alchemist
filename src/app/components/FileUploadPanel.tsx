@@ -32,16 +32,21 @@ export default function FileUploadPanel({
   });
 
   useEffect(() => {
-    const allUploaded = Object.values(uploadedFiles).every((f) => f && f.data.length > 0);
-    if (allUploaded) {
-      onCompleteUpload?.();
+    const hasAny = Object.values(uploadedFiles).some((f) => f && f.data.length > 0);
+    if (hasAny) {
       onDataParsed?.({
-        clients: uploadedFiles.clients!.data,
-        workers: uploadedFiles.workers!.data,
-        tasks: uploadedFiles.tasks!.data,
+        clients: uploadedFiles.clients?.data ?? [],
+        workers: uploadedFiles.workers?.data ?? [],
+        tasks: uploadedFiles.tasks?.data ?? [],
       });
+
+      const allUploaded = Object.values(uploadedFiles).every((f) => f && f.data.length > 0);
+      if (allUploaded) {
+        onCompleteUpload?.();
+      }
     }
   }, [uploadedFiles]);
+
 
   const handleFileUpload = (type: UploadType) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

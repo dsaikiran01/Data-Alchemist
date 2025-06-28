@@ -126,10 +126,11 @@ export default function CollapsibleStepperPage() {
         <AccordionDetails>
           <FileUploadPanel
             onCompleteUpload={() => setActiveStep(1)}
-            onDataParsed={({ clients, workers, tasks }) => {
-              setClients(clients);
-              setWorkers(workers);
-              setTasks(tasks);
+            onDataParsed={({ clients = [], workers = [], tasks = [] }) => {
+              console.log("Parsed:", { clients, workers, tasks });
+              setClients(clients.map((c, i) => ({ ...c, id: i })));
+              setWorkers(workers.map((w, i) => ({ ...w, id: i })));
+              setTasks(tasks.map((t, i) => ({ ...t, id: i })));
             }}
           />
 
@@ -137,27 +138,27 @@ export default function CollapsibleStepperPage() {
           {clients.length > 0 && (
             <DataGridWrapper
               title="Clients"
-              rows={clients.map((c, i) => ({ ...c, id: i }))}
+              rows={clients}
               columns={clientColumns}
-              onRowsChange={(rows) => setClients(rows)}
+              onRowsChange={setClients}
             />
           )}
 
           {workers.length > 0 && (
             <DataGridWrapper
               title="Workers"
-              rows={workers.map((w, i) => ({ ...w, id: i }))}
+              rows={workers}
               columns={workerColumns}
-              onRowsChange={(rows) => setWorkers(rows)}
+              onRowsChange={setWorkers}
             />
           )}
 
           {tasks.length > 0 && (
             <DataGridWrapper
               title="Tasks"
-              rows={tasks.map((t, i) => ({ ...t, id: i }))}
+              rows={tasks}
               columns={taskColumns}
-              onRowsChange={(rows) => setTasks(rows)}
+              onRowsChange={setTasks}
             />
           )}
 
