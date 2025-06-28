@@ -16,20 +16,30 @@ interface UploadedFile {
 
 export default function FileUploadPanel({
   onCompleteUpload,
+  onDataParsed,
 }: {
   onCompleteUpload?: () => void;
+  onDataParsed?: (data: {
+    clients: any[];
+    workers: any[];
+    tasks: any[];
+  }) => void;
 }) {
-  const [uploadedFiles, setUploadedFiles] = useState<Record<UploadType, UploadedFile | null>>({
+  const [uploadedFiles, setUploadedFiles] = useState({
     clients: null,
     workers: null,
     tasks: null,
   });
 
-  // ✅ Check if all files uploaded
   useEffect(() => {
     const allUploaded = Object.values(uploadedFiles).every((f) => f && f.data.length > 0);
-    if (allUploaded && onCompleteUpload) {
-      onCompleteUpload(); // 🔔 Notify parent
+    if (allUploaded) {
+      onCompleteUpload?.();
+      onDataParsed?.({
+        clients: uploadedFiles.clients!.data,
+        workers: uploadedFiles.workers!.data,
+        tasks: uploadedFiles.tasks!.data,
+      });
     }
   }, [uploadedFiles]);
 
@@ -55,10 +65,10 @@ export default function FileUploadPanel({
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         📥 Upload CSV Files
-      </Typography>
-      <Stack spacing={2} direction="row" flexWrap="wrap">
+      </Typography> */}
+      <Stack spacing={2} direction="column" flexWrap="wrap">
         {(["clients", "workers", "tasks"] as UploadType[]).map((type) => (
           <Box key={type}>
             <Button variant="outlined" component="label">

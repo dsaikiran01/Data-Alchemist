@@ -22,6 +22,7 @@ import {
 import { useState, useEffect } from "react";
 import { useRuleStore } from "@/store/useStore";
 
+import DataGridWrapper from "@/components/DataGridWrapper";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileUploadPanel from "@/components/FileUploadPanel";
 import RuleInputForm from "@/components/RuleBuilder/RuleInputForm";
@@ -39,7 +40,43 @@ const steps = ["Upload", "Rules", "Prioritize", "Export"];
 
 export default function CollapsibleStepperPage() {
   const [activeStep, setActiveStep] = useState(0);
-const [weights, setWeights] = useState({ priority: 50, fairness: 30, speed: 20 });
+  const [weights, setWeights] = useState({ priority: 50, fairness: 30, speed: 20 });
+
+  // for storing data fromm .csv files
+  const [clients, setClients] = useState<any[]>([]);
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  const clientColumns =
+    clients.length > 0
+      ? Object.keys(clients[0]).map((key) => ({
+        field: key,
+        headerName: key,
+        flex: 1,
+        editable: true,
+      }))
+      : [];
+
+  const workerColumns =
+    workers.length > 0
+      ? Object.keys(workers[0]).map((key) => ({
+        field: key,
+        headerName: key,
+        flex: 1,
+        editable: true,
+      }))
+      : [];
+
+  const taskColumns =
+    tasks.length > 0
+      ? Object.keys(tasks[0]).map((key) => ({
+        field: key,
+        headerName: key,
+        flex: 1,
+        editable: true,
+      }))
+      : [];
+
 
   const handleNext = () => {
     if (activeStep < steps.length - 1) setActiveStep(activeStep + 1);
@@ -87,8 +124,43 @@ const [weights, setWeights] = useState({ priority: 50, fairness: 30, speed: 20 }
           <Typography variant="h6">📥 Upload CSV Files</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {/* <FileUploadPanel /> */}
-          <FileUploadPanel onCompleteUpload={() => setActiveStep(1)} />
+          <FileUploadPanel
+            onCompleteUpload={() => setActiveStep(1)}
+            onDataParsed={({ clients, workers, tasks }) => {
+              setClients(clients);
+              setWorkers(workers);
+              setTasks(tasks);
+            }}
+          />
+
+          {/* for rendering the rows when files are uploaded */}
+          {clients.length > 0 && (
+            <DataGridWrapper
+              title="Clients"
+              rows={clients.map((c, i) => ({ ...c, id: i }))}
+              columns={clientColumns}
+              onRowsChange={(rows) => setClients(rows)}
+            />
+          )}
+
+          {workers.length > 0 && (
+            <DataGridWrapper
+              title="Workers"
+              rows={workers.map((w, i) => ({ ...w, id: i }))}
+              columns={workerColumns}
+              onRowsChange={(rows) => setWorkers(rows)}
+            />
+          )}
+
+          {tasks.length > 0 && (
+            <DataGridWrapper
+              title="Tasks"
+              rows={tasks.map((t, i) => ({ ...t, id: i }))}
+              columns={taskColumns}
+              onRowsChange={(rows) => setTasks(rows)}
+            />
+          )}
+
           <Box textAlign="right">
             <Button variant="contained" onClick={handleNext}>
               Continue to Rules
