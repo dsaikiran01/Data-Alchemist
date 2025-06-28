@@ -1,6 +1,8 @@
+// src/app/components/FileUploadPanel.tsx
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Typography, Paper, Stack } from "@mui/material";
 import Papa from "papaparse";
 
@@ -12,14 +14,26 @@ interface UploadedFile {
   columns: string[];
 }
 
-export default function FileUploadPanel() {
+export default function FileUploadPanel({
+  onCompleteUpload,
+}: {
+  onCompleteUpload?: () => void;
+}) {
   const [uploadedFiles, setUploadedFiles] = useState<Record<UploadType, UploadedFile | null>>({
     clients: null,
     workers: null,
     tasks: null,
   });
 
-  const handleFileUpload = (type: UploadType) => async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ✅ Check if all files uploaded
+  useEffect(() => {
+    const allUploaded = Object.values(uploadedFiles).every((f) => f && f.data.length > 0);
+    if (allUploaded && onCompleteUpload) {
+      onCompleteUpload(); // 🔔 Notify parent
+    }
+  }, [uploadedFiles]);
+
+  const handleFileUpload = (type: UploadType) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -40,12 +54,11 @@ export default function FileUploadPanel() {
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 5 }}>
+    <Paper sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
-        📥 Upload Your CSV Files
+        📥 Upload CSV Files
       </Typography>
-
-      <Stack spacing={3} direction="row" flexWrap="wrap" mt={2}>
+      <Stack spacing={2} direction="row" flexWrap="wrap">
         {(["clients", "workers", "tasks"] as UploadType[]).map((type) => (
           <Box key={type}>
             <Button variant="outlined" component="label">
@@ -53,8 +66,8 @@ export default function FileUploadPanel() {
               <input type="file" accept=".csv" hidden onChange={handleFileUpload(type)} />
             </Button>
             {uploadedFiles[type] && (
-              <Typography mt={1} fontSize="0.875rem" color="text.secondary">
-                ✅ {uploadedFiles[type]!.name} — {uploadedFiles[type]!.data.length} rows
+              <Typography fontSize="0.85rem" color="text.secondary" mt={0.5}>
+                ✅ {uploadedFiles[type]!.name} ({uploadedFiles[type]!.data.length} rows)
               </Typography>
             )}
           </Box>

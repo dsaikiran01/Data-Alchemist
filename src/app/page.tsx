@@ -19,9 +19,10 @@ import {
 
 // src/app/page.tsx
 
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRuleStore } from "@/store/useStore";
 
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FileUploadPanel from "@/components/FileUploadPanel";
 import RuleInputForm from "@/components/RuleBuilder/RuleInputForm";
 import RuleList from "@/components/RuleBuilder/RuleList";
@@ -38,12 +39,29 @@ const steps = ["Upload", "Rules", "Prioritize", "Export"];
 
 export default function CollapsibleStepperPage() {
   const [activeStep, setActiveStep] = useState(0);
+const [weights, setWeights] = useState({ priority: 50, fairness: 30, speed: 20 });
 
   const handleNext = () => {
     if (activeStep < steps.length - 1) setActiveStep(activeStep + 1);
   };
 
+  const rules = useRuleStore((s) => s.rules);
+
   const isOpen = (index: number) => index <= activeStep;
+
+  // from step-2 to step-3
+  useEffect(() => {
+    if (activeStep === 1 && rules.length > 0) {
+      setActiveStep(2);
+    }
+  }, [rules]);
+
+  // from step-3 to step-4
+  useEffect(() => {
+    if (activeStep === 2 && Object.values(weights).some((w) => w !== 0)) {
+      setActiveStep(3);
+    }
+  }, [weights]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -69,7 +87,8 @@ export default function CollapsibleStepperPage() {
           <Typography variant="h6">📥 Upload CSV Files</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <FileUploadPanel />
+          {/* <FileUploadPanel /> */}
+          <FileUploadPanel onCompleteUpload={() => setActiveStep(1)} />
           <Box textAlign="right">
             <Button variant="contained" onClick={handleNext}>
               Continue to Rules
@@ -109,7 +128,8 @@ export default function CollapsibleStepperPage() {
         </AccordionSummary>
         <AccordionDetails>
           <Paper sx={{ p: 3 }}>
-            <SliderWeights onChange={(w) => console.log("weights", w)} />
+            {/* <SliderWeights onChange={(w) => console.log("weights", w)} /> */}
+            <SliderWeights onChange={(w) => setWeights(w)} />
           </Paper>
           <Box textAlign="right" mt={2}>
             <Button variant="contained" onClick={handleNext}>
