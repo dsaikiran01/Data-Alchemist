@@ -1,0 +1,7 @@
+ClientID,ClientName,PriorityLevel,RequestedTaskIDs,GroupTag,AttributesJSON
+C1,Acme Corp,3,"T1,T2,T3",GroupA,"{""location"":""New York"",""budget"":100000}"
+C2,Globex Inc,1,"T3,T4",GroupB,"{""notes"":""Important client"",""sla"":""24h""}"
+C3,Initech,4,"T2,T5,T6",GroupA,"{""vip"":true,""region"":""US-West""}"
+C4,Umbrella Co,5,"T7,T1,T6",GroupC,"{""budget"":150000,""priority"":""high""}"
+C5,Stark Industries,2,"T2,T3",GroupB,"{""notes"":""Rush order"",""region"":""Global""}"
+
