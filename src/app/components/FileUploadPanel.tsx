@@ -9,12 +9,6 @@ import * as XLSX from "xlsx";
 
 type UploadType = "clients" | "workers" | "tasks";
 
-interface UploadedFile {
-  name: string;
-  data: any[];
-  columns: string[];
-}
-
 export default function FileUploadPanel({
   onCompleteUpload,
   onDataParsed,

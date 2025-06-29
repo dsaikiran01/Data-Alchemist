@@ -7,13 +7,12 @@ import {
     Paper,
     Button,
     Stack,
-    IconButton,
 } from "@mui/material";
 import {
     DataGrid,
     GridColDef,
     GridRowsProp,
-    GridEventListener,
+    GridRowModel,
     GridRowId,
     GridActionsCellItem,
     useGridApiRef,
@@ -34,8 +33,6 @@ interface DataGridWrapperRef {
     scrollToRow: (id: number) => void;
 }
 
-// function DataGridWrapper({ title, rows, columns, onRowsChange }: DataGridWrapperProps, ref: React.Ref<any>, highlighted?: { id: number; field: string }) {
-
 const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
     title,
     rows,
@@ -54,17 +51,11 @@ const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
         scrollToRow: (id: number) => {
             const rowIndex = rows.findIndex(row => row.id === id);
             if (rowIndex !== -1) {
-                // gridRef.current?.scrollToIndexes({ rowIndex });
                 apiRef.current?.scrollToIndexes({ rowIndex }); // Using apiRef to scroll
 
             }
         },
     }));
-
-    const handleRowEdit: GridEventListener<"rowEditStop"> = (_, event) => {
-        const updatedRows = [...localRows];
-        onRowsChange?.(updatedRows);
-    };
 
     const handleAddRow = () => {
         const maxId = localRows.length
@@ -134,7 +125,7 @@ const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
                     apiRef={apiRef} // Pass the apiRef to the DataGrid for scrolling to error row
                     rows={localRows}
                     columns={withDeleteColumn}
-                    processRowUpdate={(updatedRow) => {
+                    processRowUpdate={(updatedRow: GridRowModel) => {
                         const updated = localRows.map((row) =>
                             row.id === updatedRow.id ? updatedRow : row
                         );
@@ -142,8 +133,6 @@ const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
                         onRowsChange?.(updated);
                         return updatedRow;
                     }}
-                    experimentalFeatures={{ newEditingApi: true }}
-                    pageSize={5}
                     getRowId={(row) => row.id}
                     getCellClassName={(params) => {
                         if (
@@ -151,7 +140,6 @@ const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
                             highlighted.id === params.id &&
                             highlighted.field === params.field
                         ) {
-                            console.log("Highlighting cell:", params);
                             return "blinking-error-cell";
                         }
                         return "";
