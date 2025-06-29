@@ -1,71 +1,82 @@
 "use client";
 
-import { Button, Box, Typography, Stack } from "@mui/material";
-import { useRuleStore } from "@/store/useStore";
-import generateRulesJson from "@/lib/generateRulesJson";
+import { Button, Stack, Typography } from "@mui/material";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
+import { assignTasks } from "@/lib/taskAllocator";
 
 export default function ExportPanel({
   clients,
   workers,
   tasks,
-  disabled = false,
+  rules,
+  weights,
+  disabled,
 }: {
   clients: any[];
   workers: any[];
   tasks: any[];
+  rules: any[];
+  weights: { fairness: number; speed: number; loadBalance: number };
   disabled?: boolean;
 }) {
-  const { rules } = useRuleStore();
+  const toCsv = (data: any[]) => {
+    const headers = Object.keys(data[0] || {}).filter((h) => h !== "id");
+    const rows = data.map((row) =>
+      headers.map((h) => `"${row[h] ?? ""}"`).join(",")
+    );
+    return [headers.join(","), ...rows].join("\n");
+  };
 
-  const handleDownload = () => {
-    // for removing "id" column before exporting csv file
-    // const exportWithoutId = rows.map(({ id, ...rest }) => rest);
+  const handleExport = async () => {
+    const zip = new JSZip();
 
-    // Export rules.json
-    const ruleBlob = new Blob([generateRulesJson.rules], {
-      type: "application/json",
-    });
-    saveAs(ruleBlob, "rules.json");
+    const enhancedTasks = assignTasks(tasks, workers, rules, weights);
 
-    // Placeholder JSON for prioritization — replace with actual weights if needed
-    const prioritization = {
-      priority: 50,
-      fairness: 30,
-      speed: 20,
-    };
-    const priorityBlob = new Blob([JSON.stringify(prioritization, null, 2)], {
-      type: "application/json",
-    });
-    saveAs(priorityBlob, "prioritization.json");
+    // Add JSON files
+    zip.file("tasks.json", JSON.stringify(enhancedTasks, null, 2));
+    zip.file("rules.json", JSON.stringify(rules, null, 2));
+    zip.file(
+      "prioritization.json",
+      JSON.stringify(
+        {
+          weights,
+          explanation:
+            "Higher scores = better matches based on skills, phases, and load.",
+        },
+        null,
+        2
+      )
+    );
 
-    // Example CSV exports — replace with actual CSV content
-    const sampleCsv = `ID,Name\nT1,Task One\nT2,Task Two`;
-    const csvBlob = new Blob([sampleCsv], { type: "text/csv;charset=utf-8;" });
-    saveAs(csvBlob, "tasks.csv");
+    // Add CSV files
+    zip.file("clients.csv", toCsv(clients));
+    zip.file("workers.csv", toCsv(workers));
+    zip.file("tasks.csv", toCsv(tasks));
 
-    // Add more CSVs here as you wire up data ingestion grids
+    // Generate and download zip
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\..+/, ""); // YYYYMMDDTHHmmss
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, `data-alchemist-export-${timestamp}.zip`);
   };
 
   return (
-    <Box mt={6}>
-      <Typography variant="h6" gutterBottom>
-        📤 Export Configuration
+    <Stack spacing={2}>
+      <Typography variant="body2" color="text.secondary">
+        Download all configured data as a single zipped export.
       </Typography>
 
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        Download your rules, prioritization weights, and cleaned CSVs.
-      </Typography>
-
-      <Stack direction="row" spacing={2} mt={2}>
-        <Button 
-          variant="contained" 
-          onClick={handleDownload}
-          disabled={disabled}
-        >
-          Download All Files
-        </Button>
-      </Stack>
-    </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleExport}
+        disabled={disabled}
+      >
+        Export All Files (ZIP)
+      </Button>
+    </Stack>
   );
 }

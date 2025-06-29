@@ -84,7 +84,12 @@ const getValidationErrors = (rows: any[], schema: ZodSchema) => {
 
 export default function CollapsibleStepperPage() {
   const [activeStep, setActiveStep] = useState(0);
-  const [weights, setWeights] = useState({ priority: 50, fairness: 30, speed: 20 });
+  const [weights, setWeights] = useState({
+    fairness: 30,
+    speed: 50,
+    loadBalance: 20,
+  });
+
 
   // for storing data fromm .csv files
   const [clients, setClients] = useState<any[]>([]);
@@ -232,19 +237,20 @@ export default function CollapsibleStepperPage() {
                     const field = error.issues[0].field;
                     const rowIndex = error.index;
                     workerGridRef.current?.scrollToRow(rowIndex);
-                     requestAnimationFrame(() => {
-                    console.log("Setting worker highlight:", { id: rowIndex, field });
+                    requestAnimationFrame(() => {
+                      console.log("Setting worker highlight:", { id: rowIndex, field });
 
                       setHighlightedWorker({
-                      id: rowIndex,
-                      field: typeof field === 'string' ? field : String(field)
-                    });
+                        id: rowIndex,
+                        field: typeof field === 'string' ? field : String(field)
+                      });
 
-                    console.log("Setting worker highlight:", { id: rowIndex, field });
+                      console.log("Setting worker highlight:", { id: rowIndex, field });
 
-                    // Remove highlight after 1.5s
-                    setTimeout(() => setHighlightedWorker(null), 1500);
-                  })}
+                      // Remove highlight after 1.5s
+                      setTimeout(() => setHighlightedWorker(null), 1500);
+                    })
+                  }
                 }}
               >
                 Jump to First Worker Error
@@ -349,7 +355,7 @@ export default function CollapsibleStepperPage() {
         <AccordionDetails>
           <Paper sx={{ p: 3 }}>
             {/* <SliderWeights onChange={(w) => console.log("weights", w)} /> */}
-            <SliderWeights onChange={(w) => setWeights(w)} />
+            <SliderWeights onChange={setWeights} />
           </Paper>
           <Box textAlign="right" mt={2}>
             <Button variant="contained" onClick={handleNext}>
@@ -369,6 +375,8 @@ export default function CollapsibleStepperPage() {
             clients={clients}
             workers={workers}
             tasks={tasks}
+            rules={rules}
+            weights={weights} 
             disabled={hasExportErrors}
           />
         </AccordionDetails>

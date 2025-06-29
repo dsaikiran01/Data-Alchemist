@@ -93,7 +93,7 @@ const RuleInputForm: React.FC<RuleInputFormProps> = ({ taskIds, groupTags }) => 
           value={tasks}
           // onChange={(e) => setTasks(e.target.value as string[])}
           // onChange={(e) => setTasks([e.target.value])}
-          onChange={(e) => setTasks(e.target.value.split(',').map((item) => item.trim()))}
+          onChange={(e) => setTasks(e.target.value.map((item: string) => item.trim()))}
           sx={{ mb: 2 }}
         >
           {dummyTaskIds.map((id) => (
