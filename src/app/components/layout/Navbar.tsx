@@ -29,12 +29,12 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  // const scrollTo = (id: string) => {
+  //   const el = document.getElementById(id);
+  //   if (el) {
+  //     el.scrollIntoView({ behavior: "smooth", block: "start" });
+  //   }
+  // };
 
   return (
     <AppBar position="sticky" elevation={2} sx={{ zIndex: 1300 }}>
@@ -46,7 +46,7 @@ export default function Navbar() {
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={2}>
+        {/* <Stack direction="row" spacing={2}>
           {SECTIONS.map((sec) => (
             <Button
               key={sec}
@@ -60,7 +60,7 @@ export default function Navbar() {
               {sec}
             </Button>
           ))}
-        </Stack>
+        </Stack> */}
       </Toolbar>
     </AppBar>
   );

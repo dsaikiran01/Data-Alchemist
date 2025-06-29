@@ -5,7 +5,17 @@ import { useRuleStore } from "@/store/useStore";
 import generateRulesJson from "@/lib/generateRulesJson";
 import { saveAs } from "file-saver";
 
-export default function ExportPanel() {
+export default function ExportPanel({
+  clients,
+  workers,
+  tasks,
+  disabled = false,
+}: {
+  clients: any[];
+  workers: any[];
+  tasks: any[];
+  disabled?: boolean;
+}) {
   const { rules } = useRuleStore();
 
   const handleDownload = () => {
@@ -48,7 +58,11 @@ export default function ExportPanel() {
       </Typography>
 
       <Stack direction="row" spacing={2} mt={2}>
-        <Button variant="contained" onClick={handleDownload}>
+        <Button 
+          variant="contained" 
+          onClick={handleDownload}
+          disabled={disabled}
+        >
           Download All Files
         </Button>
       </Stack>

@@ -16,20 +16,50 @@ import {
     GridEventListener,
     GridRowId,
     GridActionsCellItem,
+    useGridApiRef,
 } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
-interface Props {
+interface DataGridWrapperProps {
     title: string;
     rows: GridRowsProp;
     columns: GridColDef[];
     onRowsChange?: (rows: GridRowsProp) => void;
+    highlighted: { id: number; field: string } | null;
 }
 
-export default function DataGridWrapper({ title, rows, columns, onRowsChange }: Props) {
+interface DataGridWrapperRef {
+    scrollToRow: (id: number) => void;
+}
+
+// function DataGridWrapper({ title, rows, columns, onRowsChange }: DataGridWrapperProps, ref: React.Ref<any>, highlighted?: { id: number; field: string }) {
+
+const DataGridWrapper = forwardRef<DataGridWrapperRef, DataGridWrapperProps>(({
+    title,
+    rows,
+    columns,
+    onRowsChange,
+    highlighted
+}, ref) => {
+
     const [localRows, setLocalRows] = useState<GridRowsProp>(rows);
+
+    const gridRef = useRef<any>(null);
+    const apiRef = useGridApiRef(); // Using the apiRef for controlling the grid
+
+    // Expose the scrollToRow function to the parent via ref
+    useImperativeHandle(ref, () => ({
+        scrollToRow: (id: number) => {
+            const rowIndex = rows.findIndex(row => row.id === id);
+            if (rowIndex !== -1) {
+                // gridRef.current?.scrollToIndexes({ rowIndex });
+                apiRef.current?.scrollToIndexes({ rowIndex }); // Using apiRef to scroll
+
+            }
+        },
+    }));
 
     const handleRowEdit: GridEventListener<"rowEditStop"> = (_, event) => {
         const updatedRows = [...localRows];
@@ -100,6 +130,8 @@ export default function DataGridWrapper({ title, rows, columns, onRowsChange }: 
                 },
             }}>
                 <DataGrid
+                    ref={gridRef}
+                    apiRef={apiRef} // Pass the apiRef to the DataGrid for scrolling to error row
                     rows={localRows}
                     columns={withDeleteColumn}
                     processRowUpdate={(updatedRow) => {
@@ -112,8 +144,23 @@ export default function DataGridWrapper({ title, rows, columns, onRowsChange }: 
                     }}
                     experimentalFeatures={{ newEditingApi: true }}
                     pageSize={5}
+                    getRowId={(row) => row.id}
+                    getCellClassName={(params) => {
+                        if (
+                            highlighted &&
+                            highlighted.id === params.id &&
+                            highlighted.field === params.field
+                        ) {
+                            console.log("Highlighting cell:", params);
+                            return "blinking-error-cell";
+                        }
+                        return "";
+                    }}
                 />
             </Box>
         </Paper>
     );
-}
+});
+
+// export default forwardRef(DataGridWrapper);
+export default DataGridWrapper;

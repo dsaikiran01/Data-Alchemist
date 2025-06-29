@@ -9,7 +9,16 @@ import { Rule, RuleType } from "@/types/rules";
 const dummyTaskIds = ["T1", "T2", "T3"];
 const dummyGroups = ["Sales", "Ops", "HR"];
 
-export default function RuleInputForm() {
+import React from 'react';
+
+interface RuleInputFormProps {
+  taskIds: string[];
+  groupTags: string[];
+}
+
+// export default function RuleInputForm() {
+
+const RuleInputForm: React.FC<RuleInputFormProps> = ({ taskIds, groupTags }) => {
   const { addRule } = useRuleStore();
   const [ruleType, setRuleType] = useState<RuleType>("coRun");
 
@@ -74,10 +83,17 @@ export default function RuleInputForm() {
         <TextField
           select
           label="Select Tasks"
-          SelectProps={{ multiple: true }}
+          // SelectProps={{ multiple: true }}
+          slotProps={{
+            select: {
+              multiple: true,
+            },
+          }}
           fullWidth
           value={tasks}
-          onChange={(e) => setTasks(e.target.value as string[])}
+          // onChange={(e) => setTasks(e.target.value as string[])}
+          // onChange={(e) => setTasks([e.target.value])}
+          onChange={(e) => setTasks(e.target.value.split(',').map((item) => item.trim()))}
           sx={{ mb: 2 }}
         >
           {dummyTaskIds.map((id) => (
@@ -160,3 +176,5 @@ export default function RuleInputForm() {
     </Box>
   );
 }
+
+export default RuleInputForm;

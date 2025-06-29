@@ -29,3 +29,26 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* for blinking effect when scrolled to error row */
+.blinking-error-cell {
+  animation: blinkBorder 1.5s ease-in-out;
+  border: 2px solid red !important;
+  border-radius: 4px;
+  background-color: rgba(255, 0, 0, 0.1);
+
+}
+
+@keyframes blinkBorder {
+  0% {
+    box-shadow: 0 0 0 0 red;
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.4);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 red;
+  }
+}
