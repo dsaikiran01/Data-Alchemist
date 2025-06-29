@@ -49,32 +49,38 @@ export default function CollapsibleStepperPage() {
 
   const clientColumns =
     clients.length > 0
-      ? Object.keys(clients[0]).map((key) => ({
-        field: key,
-        headerName: key,
-        flex: 1,
-        editable: true,
-      }))
+      ? Object.keys(clients[0])
+        .filter((key) => key !== "id")
+        .map((key) => ({
+          field: key,
+          headerName: key,
+          flex: 1,
+          editable: true,
+        }))
       : [];
 
   const workerColumns =
     workers.length > 0
-      ? Object.keys(workers[0]).map((key) => ({
-        field: key,
-        headerName: key,
-        flex: 1,
-        editable: true,
-      }))
+      ? Object.keys(workers[0])
+        .filter((key) => key !== "id")
+        .map((key) => ({
+          field: key,
+          headerName: key,
+          flex: 1,
+          editable: true,
+        }))
       : [];
 
   const taskColumns =
     tasks.length > 0
-      ? Object.keys(tasks[0]).map((key) => ({
-        field: key,
-        headerName: key,
-        flex: 1,
-        editable: true,
-      }))
+      ? Object.keys(tasks[0])
+        .filter((key) => key !== "id")
+        .map((key) => ({
+          field: key,
+          headerName: key,
+          flex: 1,
+          editable: true,
+        }))
       : [];
 
 

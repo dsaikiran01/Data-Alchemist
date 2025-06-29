@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import { Box, Button, Typography, Paper, Stack } from "@mui/material";
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 type UploadType = "clients" | "workers" | "tasks";
 
@@ -52,20 +53,41 @@ export default function FileUploadPanel({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        setUploadedFiles((prev) => ({
-          ...prev,
-          [type]: {
-            name: file.name,
-            data: result.data,
-            columns: result.meta.fields || [],
-          },
-        }));
-      },
-    });
+    const fileName = file.name.toLowerCase();
+
+    const parseAndSet = (parsed: any[]) => {
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [type]: {
+          name: file.name,
+          data: parsed,
+          columns: parsed.length > 0 ? Object.keys(parsed[0]) : [],
+        },
+      }));
+    };
+
+    if (fileName.endsWith(".csv")) {
+      // ✅ Parse CSV
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => parseAndSet(result.data),
+      });
+    } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+      // ✅ Parse Excel
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const bstr = evt.target?.result;
+        const workbook = XLSX.read(bstr, { type: "binary" });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const parsed = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+        parseAndSet(parsed);
+      };
+      // reader.readAsBinaryString(file) is deprecated
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert("Unsupported file type. Please upload .csv or .xlsx/.xls");
+    }
   };
 
   return (
@@ -78,7 +100,7 @@ export default function FileUploadPanel({
           <Box key={type}>
             <Button variant="outlined" component="label">
               Upload {type}.csv
-              <input type="file" accept=".csv" hidden onChange={handleFileUpload(type)} />
+              <input type="file" accept=".csv,.xlsx,.xls" hidden onChange={handleFileUpload(type)} />
             </Button>
             {uploadedFiles[type] && (
               <Typography fontSize="0.85rem" color="text.secondary" mt={0.5}>

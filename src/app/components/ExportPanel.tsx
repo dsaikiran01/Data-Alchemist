@@ -2,15 +2,18 @@
 
 import { Button, Box, Typography, Stack } from "@mui/material";
 import { useRuleStore } from "@/store/useStore";
-import { generateRulesJson } from "@/lib/generateRulesJson";
+import generateRulesJson from "@/lib/generateRulesJson";
 import { saveAs } from "file-saver";
 
 export default function ExportPanel() {
   const { rules } = useRuleStore();
 
   const handleDownload = () => {
+    // for removing "id" column before exporting csv file
+    // const exportWithoutId = rows.map(({ id, ...rest }) => rest);
+
     // Export rules.json
-    const ruleBlob = new Blob([generateRulesJson(rules)], {
+    const ruleBlob = new Blob([generateRulesJson.rules], {
       type: "application/json",
     });
     saveAs(ruleBlob, "rules.json");

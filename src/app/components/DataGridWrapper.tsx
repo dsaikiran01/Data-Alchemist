@@ -41,9 +41,7 @@ export default function DataGridWrapper({ title, rows, columns, onRowsChange }: 
             ? Math.max(...localRows.map((r) => Number(r.id) || 0))
             : 0;
 
-        const newId = maxId + 1;
-
-        const emptyRow: any = { id: newId };
+        const emptyRow: any = { id: maxId + 1 };
         columns.forEach((col) => {
             if (col.field !== "id") emptyRow[col.field] = "";
         });
